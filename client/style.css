@@ -1,0 +1,32 @@
+#chat {
+	width: 50%;
+    background: #666;
+}
+
+.hide {
+	display: none;
+}
+
+.message {
+	max-width: 40%;
+	background: #666;
+	color: #fff;
+	display: block;
+	padding: 1rem;
+	margin: 0.3rem;
+	border-radius: 3rem;
+}
+
+.left {
+	display: block;
+    float: left;
+	text-align: left;
+	background: #328bff;
+}
+
+.right {
+	display: block;
+    float: right;
+	text-align: right;
+	background: greenyellow;
+}
