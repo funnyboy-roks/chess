@@ -1,67 +1,85 @@
 import express = require('express');
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
+import Board from './Board';
+
 const app = express();
 const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const io: Server = require('socket.io')(http);
 require('dotenv').config();
 const port = process.env.PORT || 3000;
 
+type Connection = {
+	name: string;
+	board: number;
+	socket: Socket;
+	opponent: Connection;
+}
+
+// socketid : connection
+const connections: Map<string, Connection> = new Map();
 
 app.use(express.static('client'));
 
-type UserInfo = {
-	partner: string,
-	socket: Socket,
-}
-
-// socket id : user info
-const currentUsers: Map<string, UserInfo> = new Map();
+const boards: Board[] = [];
 
 io.on('connection', (socket: Socket) => {
 	console.log(`Connected - ${socket.id}`);
-	const user = {
-		name: '',
-		partner: null,
+
+	const connection: Connection = {
+		name: null,
+		board: null,
 		socket,
+		opponent: null,
 	};
-	currentUsers.set(socket.id, user);
 
-	socket.on('join', (req) => {
-		let error: string = '';
+	connections.set(socket.id, connection);
 
-		if (currentUsers.has(req.partner)) {
-			user.partner = req.partner;
-		} else {
-			error = 'User not found';
+	socket.on('registerName', ({ username }) => {
+		for (const connection of connections.values()) {
+			if (connection.name === username) {
+				socket.emit('registerNameReply', { error: 'Username already taken' });
+				return;
+			}
 		}
-
-		if (req.partner === socket.id) {
-			error = 'You can\'t connect with yourself!'
-		}
-
-		socket.emit('joinResponse', {
-			error,
-			partner: error ? null : req.partner,
-		});
-
-		if (error) return;
-		const partner = currentUsers.get(req.partner);
-		partner.partner = socket.id;
-		partner.socket.emit('connected', {
-			partner: socket.id,
-			message: `Now connected to ${socket.id}`,
-		});
+		connection.name = username;
+		console.log(`${socket.id} registered as ${username}.`)
+		socket.emit('registerNameReply', { success: true });
 	});
 
-	socket.on('chat', (req) => {
-		currentUsers.get(user.partner)?.socket.emit('chat', req.message);
+	socket.on('findOpponent', (data) => {
+		const { name } = data;
+		for (const c of connections.values()) {
+			if (c.name === name) {
+				if (c.opponent) {
+					socket.emit('findOpponentError', { error: 'Player already in a game.' });
+					return;
+				}
+				connection.opponent = c;
+				c.opponent = connection;
+				const boardId = boards.push(new Board()) - 1;
+				connection.board = boardId;
+				c.board = boardId;
+
+				c.socket.emit('playerConnect', {
+					opponent: connection.name
+				});
+				connection.socket.emit('playerConnect', {
+					opponent: c.name
+				});
+
+				console.log(`${connection.name}(${socket.id}) connected with ${c.name}(${c.socket.id})!`)
+				return;
+			}
+		}
+		socket.emit('findOpponentError', {
+			error: 'Name not found'
+		});
+
 	});
 
 	socket.on('disconnect', () => {
 		console.log(`Disconnected - ${socket.id}`);
-		if (currentUsers.has(socket.id)) {
-			currentUsers.delete(socket.id);
-		}
+		connections.delete(socket.id);
 	});
 });
 

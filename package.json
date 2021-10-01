@@ -5,15 +5,19 @@
 	"main": "server/index.js",
 	"scripts": {
 		"start": "tsc && node server/index.js",
-		"dev": "nodemon server/index.ts"
+		"dev": "nodemon server/index.ts -w ./server/"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "Apache-2.0",
 	"dependencies": {
+		"@types/express": "^4.17.13",
 		"dotenv": "^10.0.0",
 		"express": "^4.17.1",
 		"morgan": "^1.10.0",
 		"socket.io": "^4.2.0"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.13"
 	}
 }

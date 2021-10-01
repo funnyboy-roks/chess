@@ -1,32 +1,16 @@
-#chat {
-	width: 50%;
-    background: #666;
+* {
+	font-family: sans-serif;
 }
 
 .hide {
-	display: none;
+    display: none;
 }
 
-.message {
-	max-width: 40%;
+html {
 	background: #666;
-	color: #fff;
-	display: block;
-	padding: 1rem;
-	margin: 0.3rem;
-	border-radius: 3rem;
 }
 
-.left {
-	display: block;
-    float: left;
-	text-align: left;
-	background: #328bff;
-}
-
-.right {
-	display: block;
-    float: right;
-	text-align: right;
-	background: greenyellow;
+input[type=text] {
+    font-family: monospace;
+    width: 20em;
 }

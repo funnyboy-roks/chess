@@ -6,32 +6,32 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Socket.Io Test</title>
+    <title>Chess</title>
 </head>
 
 <body>
+    <div id="info">
+        <form id="user-info">
+            Name: <input type="text" name="name" id="name">
+            <input type="submit" value="Submit">
+        </form>
+        <form id="connect" class="hide">
+            Opponent's Name: <input type="text" id="name">
+            <button type="submit">Connect</button>
+            <br>
+        </form>
+        <div id="name-info" class="hide">
+            Your Name: <input type="text" id="self-name" readonly="true">
+            <button id="self-name-copy">Copy</button>
 
-    <!-- <form id="user-info">
-        Name: <input type="text" name="name" id="name">
-        <input type="submit" value="submit">
-    </form> -->
-    <input type="text" name="copy-buffer" id="copy-buffer" class="hide">
+        </div>
 
-    <form id="connect">
-        Connect Code: <input type="text" name="code" id="code">
-        <input type="submit" value="Connect">
-    </form>
+    </div>
 
-    <input type="text" id="input">
-    <button id="send">Send</button>
-
-    <p id="output"></p>
-
-    <div id="chat"></div>
-
+    <script src="./Piece.js"></script>
     <script src="./chess.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.min.js"></script>
     <script src="./index.js"></script>
 </body>
 
