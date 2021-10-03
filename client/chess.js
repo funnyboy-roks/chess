@@ -138,20 +138,26 @@ function moveSelected(x, y) {
 		to: { x, y },
 		attack: current != null,
 	});
-}
 
-socket.on('movePieceReply', (data) => {
-	if (!data.error) {
-		const { piece } = selected;
-		board[y][x] = piece;
-		board[selected.y][selected.x] = null;
-	}
-});
+	socket.off('movePieceReply');
+	socket.on('movePieceReply', (data) => {
+		if (!data.error) {
+			const { piece } = selected;
+			board[y][x] = piece;
+			board[selected.y][selected.x] = null;
+		} else {
+			console.log(data.error);
+		}
+	});
+}
 
 function mouseClicked() {
 	const x = flipped ? 7 - Math.floor(mouseX / w) : Math.floor(mouseX / w);
 	const y = flipped ? 7 - Math.floor(mouseY / w) : Math.floor(mouseY / w);
 	if (x < 0 || y < 0 || x > 7 || y > 7) {
+		return;
+	}
+	if (canvas.elt.classList.contains('hide')) {
 		return;
 	}
 	// console.log(x, y, selected);
@@ -163,30 +169,34 @@ function mouseClicked() {
 		moveSelected(x, y);
 		selected.piece = null;
 	}
+	socket.emit('getUpdate');
 }
 
 function keyPressed() {
 	if (key === 'x') {
 		flipped = !flipped;
+	} else if(key == 'r') {
+		socket.emit('getUpdate');
 	}
 }
 
 function startGame(currentBoard, colour) {
 	reset();
 	flipped = colour === 'black';
+	updateBoard(currentBoard);
 }
 
-function updateBoard(board, turn) {
+function updateBoard(boardUpdate, turn) {
 	newBoard = [];
-	for (let y in currentBoard) {
+	for (let y in boardUpdate) {
 		const row = [];
-		for (let x in currentBoard[y]) {
-			if (currentBoard[y][x] === null) {
-				board[y][x] = null;
+		for (let x in boardUpdate[y]) {
+			if (boardUpdate[y][x] === null) {
+				row.push(null);
 				continue;
 			}
-			const { type, colour } = currentBoard[y][x];
-			row.push(new Piece(type, colour));
+			const { type, colour } = boardUpdate[y][x];
+			row.push(new Piece(type, colour == 'white'));
 		}
 		newBoard.push(row);
 	}

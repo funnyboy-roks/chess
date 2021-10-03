@@ -6,7 +6,7 @@ const startButton = document.querySelector('button#start-game');
 let username;
 
 socket.on('connect', () => {
-	if(userInfo.classList.contains('hide')) {
+	if (userInfo.classList.contains('hide')) {
 		location.reload();
 	}
 	document.querySelector('#self-name').value = socket.id;
@@ -45,7 +45,7 @@ socket.on('findOpponentError', (data) => {
 
 socket.on('playerConnect', (data) => {
 	const { opponent } = data;
-	alert(`Connected to ${opponent}!`);
+	console.log(`Connected to ${opponent}!`);
 	connectForm.classList.add('hide');
 	nameInfo.classList.add('hide');
 	startButton.classList.remove('hide');
@@ -59,13 +59,12 @@ socket.on('start', (data) => {
 	startButton.classList.add('hide');
 	const { board, colour } = data;
 	canvas?.elt.classList.remove('hide');
-	console.log(board);
 	startGame(board, colour);
 });
 
-socket.on('update', ({board, turn}) => {
-	updateBoard(board, turn)
-})
+socket.on('update', ({ board, turn }) => {
+	updateBoard(board, turn);
+});
 
 const copy = (text) => {
 	navigator.clipboard.writeText(text);

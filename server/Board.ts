@@ -20,14 +20,17 @@ export default class Board {
         this.addPieces();
     }
 
-    movePiece(from: Location, to: Location, attack: boolean) {
+    movePiece(from: Location, to: Location, attack: boolean): boolean {
         const piece: Piece = this.board[from.y][from.x];
-        if(piece.isValidMove(to.x - from.x, to.y - from.y, attack)) {
+        if (piece.isValidMove(to.x - from.x, to.y - from.y, attack)) {
             this.board[to.y][to.x] = piece;
             this.board[from.y][from.x] = null;
             this.switchTurn();
-        
+            
+            return true;
 
+        } else {
+            return false;
         }
     }
 
@@ -75,12 +78,12 @@ type Color = 'white' | 'black';
 
 export class Piece {
     type: PieceType;
-    color: Color;
+    colour: Color;
     moveCount: number;
 
     constructor(type: PieceType, color: Color) {
         this.type = type;
-        this.color = color;
+        this.colour = color;
         this.moveCount = 0;
     }
 

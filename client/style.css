@@ -6,6 +6,10 @@
     display: none;
 }
 
+canvas {
+    max-width: 100%;
+}
+
 html {
 	background: #666;
 }

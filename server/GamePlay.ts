@@ -30,9 +30,28 @@ export const registerGameEvents = (socket: Socket) => {
         const connection = users.connnections.get(socket.id);
         const board = boards[connection.boardId];
 
-        board.movePiece(from, to, attack);
+        const valid = board.movePiece(from, to, attack);
 
         connection.opponent.socket.emit('update', {
+            board: board.board,
+            turn: board.turn,
+        });
+
+        connection.socket.emit('update', {
+            board: board.board,
+            turn: board.turn,
+        });
+        
+
+        socket.emit('movePieceReply', {
+            error: !valid ? 'Invalid Move!' : false,
+        });
+    });
+
+    socket.on('getUpdate', () => {
+        const connection = users.connnections.get(socket.id);
+        const board = boards[connection.boardId];
+        socket.emit('update', {
             board: board.board,
             turn: board.turn,
         });
