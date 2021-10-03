@@ -1,17 +1,19 @@
 import { Socket } from 'socket.io';
-import { Location } from './types';
+import { Connection, Location } from './types';
 
 export default class Board {
     board: Piece[][];
-    player1Colour: 'white' | 'black';
-    turn: 'white' | 'black';
-    player1: Socket;
-    player2: Socket;
+    turn: Colour;
+    player1: Connection;
+    player2: Connection;
 
-    constructor(player1: Socket, player2: Socket) {
+    constructor(player1: Connection, player2: Connection) {
         this.player1 = player1;
         this.player2 = player2;
-        this.player1Colour = 'white';
+
+        this.player1.colour = 'white';
+        this.player2.colour = 'black';
+        
         this.turn = 'white';
     }
 
@@ -20,13 +22,20 @@ export default class Board {
         this.addPieces();
     }
 
-    movePiece(from: Location, to: Location, attack: boolean): boolean {
+    movePiece(connection: Connection, from: Location, to: Location, attack: boolean): boolean {
         const piece: Piece = this.board[from.y][from.x];
+        if (
+            (connection.colour === piece.colour) || // Move opponent Piece
+            this.turn != piece.colour // Wrong turn
+            ) {
+            return false;
+        }
+
         if (piece.isValidMove(to.x - from.x, to.y - from.y, attack)) {
             this.board[to.y][to.x] = piece;
             this.board[from.y][from.x] = null;
             this.switchTurn();
-            
+
             return true;
 
         } else {
@@ -74,16 +83,16 @@ export default class Board {
 }
 
 type PieceType = 'p' | 'R' | 'N' | 'B' | 'Q' | 'K';
-type Color = 'white' | 'black';
+type Colour = 'white' | 'black';
 
 export class Piece {
     type: PieceType;
-    colour: Color;
+    colour: Colour;
     moveCount: number;
 
-    constructor(type: PieceType, color: Color) {
+    constructor(type: PieceType, colour: Colour) {
         this.type = type;
-        this.colour = color;
+        this.colour = colour;
         this.moveCount = 0;
     }
 
@@ -96,20 +105,25 @@ export class Piece {
     isValidMove(dx: number, dy: number, attacking: boolean): boolean {
         switch (this.type) {
             case 'p':
+                const direction = (this.colour === 'white' ? 1 : -1);
                 if (attacking) {
-                    return Math.abs(dx) == 1 && dy == 1;
+                    return Math.abs(dx) === 1 && dy === direction;
                 }
-                return dx == 0 && (dy === 1 || (dy === 2 && this.moveCount === 0));
+                return (
+                    dx == 0 && // Vertical Move
+                    (dy === direction || // Move 1 step
+                        (dy === 2 * direction && this.moveCount === 0) // Move two on first move
+                    ));
             case 'R':
-                return Math.abs(dx) == 0 || Math.abs(dy) == 0;
+                return Math.abs(dx) === 0 || Math.abs(dy) === 0;
             case 'N':
-                return (Math.abs(dx) == 2 && Math.abs(dy) == 1) || (Math.abs(dx) == 1 && Math.abs(dy) == 2);
+                return (Math.abs(dx) === 2 && Math.abs(dy) === 1) || (Math.abs(dx) === 1 && Math.abs(dy) === 2);
             case 'B':
-                return Math.abs(dx) == Math.abs(dy);
+                return Math.abs(dx) === Math.abs(dy);
             case 'Q':
-                return Math.abs(dx) == 0 || Math.abs(dy) == 0 || Math.abs(dx) == Math.abs(dy);
+                return Math.abs(dx) === 0 || Math.abs(dy) === 0 || Math.abs(dx) === Math.abs(dy);
             case 'K':
-                return Math.abs(dx) == 1 || Math.abs(dy) == 1;
+                return Math.abs(dx) === 1 || Math.abs(dy) === 1;
             default:
                 return false;
 

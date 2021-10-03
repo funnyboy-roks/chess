@@ -9,6 +9,7 @@ let board = [];
 
 let selected;
 let whiteTurn;
+let colour = 'white';
 
 const sprites = {};
 const flippedSprites = {};
@@ -121,11 +122,12 @@ function draw() {
 			} else {
 				fill(50);
 			}
-			// if(selected.x == x && selected.y == y) {
-			// 	fill(255, 0, 0);
-			// }
 			rect(x * w, y * w, w, w);
 			fill(0);
+			if (selected.x == x && selected.y == y && selected.piece != null) {
+				fill(255, 0, 0, 127);
+				rect(x * w, y * w, w, w);
+			}
 			board[y][x]?.show(x * w, y * w, w);
 		}
 	}
@@ -133,6 +135,12 @@ function draw() {
 
 function moveSelected(x, y) {
 	const current = board[y][x];
+	if ((board[y][x]?.white != colour) == 'white') {
+		selected.x = -1;
+		selected.y = -1;
+		return;
+	}
+
 	socket.emit('movePiece', {
 		from: { x: selected.x, y: selected.y },
 		to: { x, y },
@@ -160,6 +168,12 @@ function mouseClicked() {
 	if (canvas.elt.classList.contains('hide')) {
 		return;
 	}
+	if ((board[y][x]?.white != colour) == 'white') {
+		selected.x = -1;
+		selected.y = -1;
+		return;
+	}
+
 	// console.log(x, y, selected);
 	if (selected.piece === null) {
 		selected.piece = board[y][x];
@@ -175,7 +189,7 @@ function mouseClicked() {
 function keyPressed() {
 	if (key === 'x') {
 		flipped = !flipped;
-	} else if(key == 'r') {
+	} else if (key == 'r') {
 		socket.emit('getUpdate');
 	}
 }
@@ -183,6 +197,7 @@ function keyPressed() {
 function startGame(currentBoard, colour) {
 	reset();
 	flipped = colour === 'black';
+	colour = colour;
 	updateBoard(currentBoard);
 }
 

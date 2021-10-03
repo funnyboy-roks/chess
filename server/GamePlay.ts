@@ -17,12 +17,12 @@ export const registerGameEvents = (socket: Socket) => {
 
         socket.emit('start', {
             board: board.board,
-            colour: board.player1Colour
+            colour: connection.colour,
         });
 
         connection.opponent.socket.emit('start', {
             board: board.board,
-            colour: board.player1Colour === 'white' ? 'black' : 'white'
+            colour: connection.opponent.colour,
         });
     });
 
@@ -30,7 +30,7 @@ export const registerGameEvents = (socket: Socket) => {
         const connection = users.connnections.get(socket.id);
         const board = boards[connection.boardId];
 
-        const valid = board.movePiece(from, to, attack);
+        const valid = board.movePiece(connection, from, to, attack);
 
         connection.opponent.socket.emit('update', {
             board: board.board,
@@ -42,7 +42,6 @@ export const registerGameEvents = (socket: Socket) => {
             turn: board.turn,
         });
         
-
         socket.emit('movePieceReply', {
             error: !valid ? 'Invalid Move!' : false,
         });
@@ -52,8 +51,8 @@ export const registerGameEvents = (socket: Socket) => {
         const connection = users.connnections.get(socket.id);
         const board = boards[connection.boardId];
         socket.emit('update', {
-            board: board.board,
-            turn: board.turn,
+            board: board?.board,
+            turn: board?.turn,
         });
     });
 }

@@ -3,7 +3,7 @@
  */
 
 import { Socket } from 'socket.io';
-import { Connection } from './types';
+import { Connection, Colour } from './types';
 import * as game from './GamePlay';
 import Board from './Board';
 
@@ -17,7 +17,7 @@ const findOpponent = (socket: Socket, connection: Connection, { name }: any) => 
                 socket.emit('findOpponentError', { error: 'Player already in a game.' });
                 return;
             }
-            const boardId = game.boards.push(new Board(c.socket, socket)) - 1;
+            const boardId = game.boards.push(new Board(c, connection)) - 1;
 
             connection.opponent = c;
             c.opponent = connection;
@@ -53,6 +53,7 @@ export const connect = (socket: Socket) => {
         boardId: null,
         socket,
         opponent: null,
+        colour: 'white',
     };
 
     connnections.set(socket.id, connection);

@@ -6,9 +6,12 @@ export type Connection = {
 	boardId: number;
 	socket: Socket;
 	opponent: Connection;
+	colour: Colour;
 };
 
 export type Location = {
 	x: number;
 	y: number;
 };
+
+export type Colour = 'white' | 'black';
