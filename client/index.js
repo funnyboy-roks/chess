@@ -1,10 +1,14 @@
 const socket = io();
 const userInfo = document.querySelector('form#user-info');
-const nameInfo = document.querySelector('div#name-info');
+const nameInfo = document.querySelector('#name-info');
 const connectForm = document.querySelector('form#connect');
+const startButton = document.querySelector('button#start-game');
 let username;
 
 socket.on('connect', () => {
+	if(userInfo.classList.contains('hide')) {
+		location.reload();
+	}
 	document.querySelector('#self-name').value = socket.id;
 	document.querySelector('#self-name-copy').addEventListener('click', (e) => {
 		e.preventDefault();
@@ -23,6 +27,7 @@ socket.on('registerNameReply', (data) => {
 		userInfo.classList.add('hide');
 		connectForm.classList.remove('hide');
 		nameInfo.classList.remove('hide');
+		nameInfo.querySelector('#self-name').value = username;
 	} else {
 		alert(data.error);
 	}
@@ -41,13 +46,26 @@ socket.on('findOpponentError', (data) => {
 socket.on('playerConnect', (data) => {
 	const { opponent } = data;
 	alert(`Connected to ${opponent}!`);
+	connectForm.classList.add('hide');
+	nameInfo.classList.add('hide');
+	startButton.classList.remove('hide');
+});
+
+startButton.addEventListener('click', () => {
+	socket.emit('startGame');
 });
 
 socket.on('start', (data) => {
+	startButton.classList.add('hide');
 	const { board, colour } = data;
 	canvas?.elt.classList.remove('hide');
+	console.log(board);
 	startGame(board, colour);
 });
+
+socket.on('update', ({board, turn}) => {
+	updateBoard(board, turn)
+})
 
 const copy = (text) => {
 	navigator.clipboard.writeText(text);

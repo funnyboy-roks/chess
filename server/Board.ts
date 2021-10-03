@@ -1,14 +1,40 @@
-import { Socket } from "socket.io";
+import { Socket } from 'socket.io';
+import { Location } from './types';
 
 export default class Board {
     board: Piece[][];
+    player1Colour: 'white' | 'black';
+    turn: 'white' | 'black';
     player1: Socket;
     player2: Socket;
 
-    constructor() {
+    constructor(player1: Socket, player2: Socket) {
+        this.player1 = player1;
+        this.player2 = player2;
+        this.player1Colour = 'white';
+        this.turn = 'white';
+    }
+
+    startGame() {
         this.board = [];
         this.addPieces();
     }
+
+    movePiece(from: Location, to: Location, attack: boolean) {
+        const piece: Piece = this.board[from.y][from.x];
+        if(piece.isValidMove(to.x - from.x, to.y - from.y, attack)) {
+            this.board[to.y][to.x] = piece;
+            this.board[from.y][from.x] = null;
+            this.switchTurn();
+        
+
+        }
+    }
+
+    switchTurn() {
+        this.turn = this.turn === 'white' ? 'black' : 'white';
+    }
+
 
     private addPieces() {
         for (let i = 0; i < 8; i++) {

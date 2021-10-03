@@ -8,6 +8,7 @@ let canvas;
 let board = [];
 
 let selected;
+let whiteTurn;
 
 const sprites = {};
 const flippedSprites = {};
@@ -62,6 +63,7 @@ let flipped = false;
 
 function reset() {
 	board = [];
+	whiteTurn = true;
 	selected = {
 		piece: null,
 		x: 0,
@@ -130,10 +132,21 @@ function draw() {
 }
 
 function moveSelected(x, y) {
-	const { piece } = selected;
-	board[y][x] = piece;
-	board[selected.y][selected.x] = null;
+	const current = board[y][x];
+	socket.emit('movePiece', {
+		from: { x: selected.x, y: selected.y },
+		to: { x, y },
+		attack: current != null,
+	});
 }
+
+socket.on('movePieceReply', (data) => {
+	if (!data.error) {
+		const { piece } = selected;
+		board[y][x] = piece;
+		board[selected.y][selected.x] = null;
+	}
+});
 
 function mouseClicked() {
 	const x = flipped ? 7 - Math.floor(mouseX / w) : Math.floor(mouseX / w);
@@ -160,6 +173,23 @@ function keyPressed() {
 
 function startGame(currentBoard, colour) {
 	reset();
-	board = currentBoard;
 	flipped = colour === 'black';
+}
+
+function updateBoard(board, turn) {
+	newBoard = [];
+	for (let y in currentBoard) {
+		const row = [];
+		for (let x in currentBoard[y]) {
+			if (currentBoard[y][x] === null) {
+				board[y][x] = null;
+				continue;
+			}
+			const { type, colour } = currentBoard[y][x];
+			row.push(new Piece(type, colour));
+		}
+		newBoard.push(row);
+	}
+	board = newBoard;
+	whiteTurn = turn === 'white';
 }
